@@ -1,0 +1,198 @@
+﻿@model PagedViewModel<IEnumerable<Employee>>
+@{ 
+    var sn = 0;
+
+    var optionsSearchFilter = new List<string>
+    {
+        "Id",
+        "FirstName",
+        "LastName",
+        "Email",
+        "Department",
+        "Title",
+        "City",
+        "kjhsdjkhfkjs",
+        "dsjfsdjf",
+        "fksdhfiohsdkuhfk",
+        "dslkkfjjkdshkjfhskjd",
+        "ieurioewuoiurwerwej",
+        "oiewruiouweyruiweyurw",
+        "kuewriuewiurweiurhuiwerwe",
+        "weiuriuewyruewiuryewr"
+    };
+
+    var optionsSortOrder = new List<string>
+    {
+        "ASC",
+        "DESC"
+    };
+
+    var optionsSelectSortBy = new List<string>
+    {
+        "Id",
+        "FirstName",
+        "LastName",
+        "Email",
+        "Department",
+        "Title",
+        "City"
+    };
+}
+
+<h3>MyPay Employees: </h3>
+<br />
+
+<form class="mb-2" asp-controller="Employees" asp-action="List" method="post" id="paginationForm">
+    <fieldset class="border pb-2 px-4">
+        <legend class="px-2 w-auto">Filters</legend>
+        <fieldset class="border pb-1 d-flex">
+            <legend class="px-2 w-auto" style="font-size: 1.2rem" for="search">Searching</legend>
+
+            <div class="input-group py-1 px-2 d-inline-flex mr-auto" style="width: 50%">
+                <label class="d-inline-block mr-2 w-auto" for="search">
+                    Search:
+                </label>
+                <input class="form-control d-inline-block w-100" type="text" value="@Model.Search" id="search" name="search" />
+            </div>
+
+            <div class="input-group py-1 px-2 d-inline-block" style="width: 30%">
+                <label class="d-inline-block mr-2 w-auto" for="searchFilter">
+                    Filter By:
+                </label>
+                <select multiple class="form-control d-inline-flex w-100" id="searchFilter" name="searchFilter">
+                    @foreach (var opt in optionsSearchFilter)
+                    {
+                        <option selected value="@opt">@opt</option>
+                    }
+                </select>
+            </div>
+
+            <div class="input-group py-1 px-2 d-inline-block" style="width: 20%">
+                <label class="d-inline-block mr-2 w-auto" for="exactMatch">Match type:</label>
+                <div class="custom-control custom-switch d-inline-block w-100">
+                    <input type="checkbox" class="custom-control-input w-100" id="exactMatch" name="exactMatch">
+                    <label class="custom-control-label d-inline-block w-100" for="exactMatch">Exact match</label>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="d-flex align-items-center justify-content-between">
+            <fieldset class="border pb-1 d-inline-block mr-4">
+                <legend class="px-2 w-auto" style="font-size: 1.2rem" for="sortBy">Sort</legend>
+                <div class="input-group w-auto py-1 px-2 d-inline-block">
+                    <label for="sortBy">
+                        Sort By:
+                        <select class="form-control w-auto d-inline-block" id="sortBy" name="sortBy">
+                            @{
+                                if (string.IsNullOrEmpty(Model.SortBy))
+                                {
+                                    <option value="none" selected disabled hidden>Select option</option>
+                                    @foreach (var opt in optionsSelectSortBy)
+                                    {
+                                        <option value="@opt">@opt</option>
+                                    }
+                                }
+                                else
+                                {
+                                    foreach (var opt in optionsSelectSortBy)
+                                    {
+                                        if (opt.Equals(Model.SortBy, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            <option selected value="@opt">@opt</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@opt">@opt</option>
+                                        }
+                                    }
+                                }
+                            }
+                        </select>
+                    </label>
+                </div>
+                <div class="input-group w-auto py-1 px-2 d-inline-block">
+                    <label class="d-inline-block" for="sortOrder">
+                        Sort Order:
+                        <select class="form-control w-auto d-inline-block" id="sortOrder" name="sortOrder">
+                            @foreach (var opt in optionsSortOrder)
+                            {
+                                if (opt.Equals(Model.SortOrder, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <option selected value="@opt">@opt</option>
+                                }
+                                else
+                                {
+                                    <option value="@opt">@opt</option>
+                                }
+                            }
+                        </select>
+                    </label>
+                </div>
+            </fieldset>
+            <fieldset class="border pb-1 d-inline-block">
+                <legend class="px-2 w-auto" style="font-size: 1.2rem" for="pageSize">Paging</legend>
+                <div class="input-group w-auto py-1 px-2 d-inline-block">
+                    <label>
+                        Show entries
+                        <input class="form-control input-param d-inline-block" type="number" id="pageSize" name="pageSize" value="@Model.PageSize" max="@Model.TotalCount" min="1" />
+                        of @Model.TotalCount
+                    </label>
+                </div>
+                <div class="input-group w-auto py-1 px-2 d-inline-block">
+                    <label>
+                        Page
+                        <button class="btn btn-param d-inline-block" id="btnPrev"><i class="fas fa-angle-left"></i></button>
+                        <input class="form-control input-param d-inline-block" type="number" id="pageIndex" name="pageIndex" value="@Model.PageIndex" max="@Model.TotalPageCount" min="1" />
+                        <button class="btn btn-param d-inline-block" id="btnNext"><i class="fas fa-angle-right"></i></button>
+                        of @Model.TotalPageCount
+                    </label>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="mt-3 d-flex justify-content-end">
+            <a class="btn btn-secondary" asp-area="" asp-controller="Employees" asp-action="List">Reset</a>
+            <button class="btn btn-success ml-3" type="submit" style="min-width: 160px">Search</button>
+        </div>
+    </fieldset>
+    <fieldset class="border pb-2 px-4">
+        <legend class="px-2 w-auto">Operations</legend>
+        <div class="d-flex justify-content-center">
+            <input type="submit" value="Export this page to Excel" class="btn btn-success" formaction="@Url.Action("Export", "Employees")" />
+            <input type="submit" value="Export to Excel" class="btn btn-success ml-2" formaction="@Url.Action("Export", "Employees")" />
+            <input type="submit" value="Export all to Excel" class="btn btn-success ml-2" formaction="@Url.Action("Export", "Employees")" />
+        </div>
+    </fieldset>
+</form>
+
+<div class="table-responsive">
+    <table class="table-bordered" id="tableReport">
+        <tr>
+            <th class="text-center">Sn</th>
+            <th class="text-center">FirstName</th>
+            <th class="text-center">LastName</th>
+            <th class="text-center">Email</th>
+            <th class="text-center">SocialSecurityNumber</th>
+            <th class="text-center">Department</th>
+            <th class="text-center">Title</th>
+            <th class="text-center">City</th>
+            <th class="text-center">Salary</th>
+        </tr>
+
+        @foreach (var item in Model.Data)
+        {
+            sn++;
+            <tr>
+                <td class="text-center">@sn</td>
+                <td class="text-left px-1">@item.FirstName</td>
+                <td class="text-left px-1">@item.LastName</td>
+                <td class="text-left px-1">@item.Email</td>
+                <td class="text-center px-1">@item.SocialSecurityNumber</td>
+                <td class="text-left px-1">@item.Department</td>
+                <td class="text-left px-1">@item.Title</td>
+                <td class="text-left px-1">@item.City</td>
+                <td class="text-right px-1">@item.Salary</td>
+            </tr>
+        }
+    </table>
+</div>
