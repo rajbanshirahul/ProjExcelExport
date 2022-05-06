@@ -6,12 +6,13 @@ namespace ProjExcelExport.Pagination
 {
     public class PaginationSpec
     {
-        private const int _maxPageSize = 1000;
+        private const int _maxPageSize = PaginationDefaults.MaxPageSize;
 
-        private int _pageSize = 20;
-        private int _pageIndex = 1;
+        private int _pageSize = PaginationDefaults.DefaultPageSize;
+        private int _pageIndex = PaginationDefaults.DefaultPageIndex;
         private string _search = null;
         private List<string> _searchFilter = null;
+        private string _exactMatch = null;
         private string _sortBy = null;
         private string _sortOrder = null;
         
@@ -40,9 +41,17 @@ namespace ProjExcelExport.Pagination
         public List<string> SearchFilter
         {
             get => _searchFilter;
-            set => _searchFilter = value.Where(x => !string.IsNullOrEmpty(x) && !string.IsNullOrEmpty(x.Trim())).ToList();
-                //? _searchFilter
-                //: value.Trim();
+            set => _searchFilter =
+                value.Where(x => !string.IsNullOrEmpty(x) && !string.IsNullOrEmpty(x.Trim())).ToList();
+        }
+
+        public string ExactMatch
+        {
+            get => _exactMatch;
+            set => _exactMatch =
+                (!string.IsNullOrEmpty(value) && value.Equals("on", StringComparison.OrdinalIgnoreCase))
+                ? "on"
+                : null;
         }
 
         public string SortBy

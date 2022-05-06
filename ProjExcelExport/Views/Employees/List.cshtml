@@ -1,34 +1,28 @@
 ﻿@model PagedViewModel<IEnumerable<Employee>>
-@{ 
+@{
     var sn = 0;
 
     var optionsSearchFilter = new List<string>
-    {
+{
         "Id",
         "FirstName",
         "LastName",
         "Email",
+        "SocialSecurityNumber",
         "Department",
         "Title",
         "City",
-        "kjhsdjkhfkjs",
-        "dsjfsdjf",
-        "fksdhfiohsdkuhfk",
-        "dslkkfjjkdshkjfhskjd",
-        "ieurioewuoiurwerwej",
-        "oiewruiouweyruiweyurw",
-        "kuewriuewiurweiurhuiwerwe",
-        "weiuriuewyruewiuryewr"
+        "Salary"
     };
 
     var optionsSortOrder = new List<string>
-    {
+{
         "ASC",
         "DESC"
     };
 
     var optionsSelectSortBy = new List<string>
-    {
+{
         "Id",
         "FirstName",
         "LastName",
@@ -62,7 +56,14 @@
                 <select multiple class="form-control d-inline-flex w-100" id="searchFilter" name="searchFilter">
                     @foreach (var opt in optionsSearchFilter)
                     {
-                        <option selected value="@opt">@opt</option>
+                        if (Model.SearchFilter != null && Model.SearchFilter.Contains(opt))
+                        {
+                            <option selected value="@opt">@opt</option>
+                        }
+                        else
+                        {
+                            <option value="@opt">@opt</option>
+                        }
                     }
                 </select>
             </div>
@@ -70,7 +71,16 @@
             <div class="input-group py-1 px-2 d-inline-block" style="width: 20%">
                 <label class="d-inline-block mr-2 w-auto" for="exactMatch">Match type:</label>
                 <div class="custom-control custom-switch d-inline-block w-100">
-                    <input type="checkbox" class="custom-control-input w-100" id="exactMatch" name="exactMatch">
+                    @{
+                        if (!string.IsNullOrEmpty(Model.ExactMatch) && Model.ExactMatch.Equals("on", StringComparison.OrdinalIgnoreCase))
+                        {
+                            <input type="checkbox" class="custom-control-input w-100" id="exactMatch" name="exactMatch" checked>
+                        }
+                        else
+                        {
+                            <input type="checkbox" class="custom-control-input w-100" id="exactMatch" name="exactMatch">
+                        }
+                    }
                     <label class="custom-control-label d-inline-block w-100" for="exactMatch">Exact match</label>
                 </div>
             </div>
@@ -133,9 +143,10 @@
                 <legend class="px-2 w-auto" style="font-size: 1.2rem" for="pageSize">Paging</legend>
                 <div class="input-group w-auto py-1 px-2 d-inline-block">
                     <label>
-                        Show entries
-                        <input class="form-control input-param d-inline-block" type="number" id="pageSize" name="pageSize" value="@Model.PageSize" max="@Model.TotalCount" min="1" />
-                        of @Model.TotalCount
+                        Show
+                        <input class="form-control input-param d-inline-block" type="number" id="pageSize" name="pageSize"
+                               value="@Model.PageSize" max="@Model.MaxPageSize" min="@Model.MinPageSize" />
+                        of @Model.TotalFilteredCount (Matched) of @Model.TotalRecordsCount (Total)
                     </label>
                 </div>
                 <div class="input-group w-auto py-1 px-2 d-inline-block">
@@ -169,6 +180,7 @@
     <table class="table-bordered" id="tableReport">
         <tr>
             <th class="text-center">Sn</th>
+            <th class="text-center">Id</th>
             <th class="text-center">FirstName</th>
             <th class="text-center">LastName</th>
             <th class="text-center">Email</th>
@@ -184,6 +196,7 @@
             sn++;
             <tr>
                 <td class="text-center">@sn</td>
+                <td class="text-left px-1">@item.Id</td>
                 <td class="text-left px-1">@item.FirstName</td>
                 <td class="text-left px-1">@item.LastName</td>
                 <td class="text-left px-1">@item.Email</td>

@@ -115,32 +115,49 @@ namespace ProjExcelExport.Data
         {
             using var connection = DbHelper.GetConnnectionDapper();
 
+            var searchFilter = (spec.SearchFilter == null || spec.SearchFilter.Count < 1)
+                ? null
+                : string.Join(",", spec.SearchFilter);
+            var exactMatch =
+                (!string.IsNullOrEmpty(spec.ExactMatch) && spec.ExactMatch.Equals("on", StringComparison.OrdinalIgnoreCase));
+
             var paramsSp = new DynamicParameters();
-            paramsSp.Add("@PageSize", spec.PageSize);
-            paramsSp.Add("@PageIndex", spec.PageIndex);
+            paramsSp.Add("@PageSize", spec.PageSize,
+                dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
+            paramsSp.Add("@PageIndex", spec.PageIndex,
+                dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
             paramsSp.Add("@Search", spec.Search);
+            paramsSp.Add("@SearchFilter", searchFilter);
+            paramsSp.Add("@ExactMatch", exactMatch);
             paramsSp.Add("@SortBy", spec.SortBy);
             paramsSp.Add("@SortOrder", spec.SortOrder);
-            paramsSp.Add("@FilteredCount", dbType: DbType.Int32, direction: ParameterDirection.Output);
+            paramsSp.Add("@FilteredCount", dbType: DbType.Int64, direction: ParameterDirection.Output);
+            paramsSp.Add("@TotalRecordsCount", dbType: DbType.Int64, direction: ParameterDirection.Output);
+            paramsSp.Add("@TotalPageCount", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
             var listEmployees = await connection
-                .QueryAsync<Employee>("[dbo].[spGerEmployeeReport]", paramsSp, commandType: CommandType.StoredProcedure);
-            var filteredCount = paramsSp.Get<int>("@FilteredCount");
+                .QueryAsync<Employee>("[dbo].[spGetEmployeeReport]", paramsSp, commandType: CommandType.StoredProcedure);
+            
+            var currentPageIndex = paramsSp.Get<int>("@PageIndex");
+            var currentPageSize = paramsSp.Get<int>("@PageSize");
+            var totalFilteredCount = paramsSp.Get<long>("@FilteredCount");
+            var totalRecordsCount = paramsSp.Get<long>("@TotalRecordsCount");
+            var totalPageCount = paramsSp.Get<int>("@TotalPageCount");
 
             return new PagedViewModel<IEnumerable<Employee>>
             {
-                PageSize = filteredCount < spec.PageSize ? filteredCount : spec.PageSize,
-                PageIndex = spec.PageIndex,
+                PageSize = currentPageSize,
+                PageIndex = currentPageIndex,
                 Search = string.IsNullOrEmpty(spec.Search) ? "" : spec.Search,
                 SearchFilter = spec.SearchFilter,
+                ExactMatch = spec.ExactMatch,
                 SortBy = spec.SortBy,
                 SortOrder = string.IsNullOrEmpty(spec.SortOrder) || string.Equals("ASC", spec.SortOrder, StringComparison.OrdinalIgnoreCase)
                     ? "ASC"
                     : "DESC",
-                TotalCount = filteredCount,
-                TotalPageCount = filteredCount % spec.PageSize == 0
-                    ? filteredCount / spec.PageSize
-                    : (filteredCount / spec.PageSize) + 1,
+                TotalFilteredCount = totalFilteredCount,
+                TotalRecordsCount = totalRecordsCount,
+                TotalPageCount = totalPageCount,
                 Data = listEmployees
             };
         }

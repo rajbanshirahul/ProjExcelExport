@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ProjExcelExport.Data;
 using ProjExcelExport.Models;
-using ProjExcelExport.ViewModels;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -22,29 +21,7 @@ namespace ProjExcelExport.Controllers
 
         public async Task<IActionResult> List([FromForm] PaginationSpec model)
         {
-            //var pageIndex = 1;
-            //var pageSize = 50;
-
-            //if (HttpContext.Request.Headers["content-type"].ToString().Equals("application/x-www-form-urlencoded"))
-            //{
-            //    pageIndex = int.Parse(HttpContext.Request.Form["pageIndex"]);
-            //    pageSize = int.Parse(HttpContext.Request.Form["pageSize"]);
-            //}
-
             var vm = await _employeeRepository.ListDapperAsync(model);
-            //var totalCount = 1000;
-
-            //var totalPageCount = totalCount % model.PageSize == 0
-            //    ? totalCount / model.PageSize : (totalCount / model.PageSize) + 1;
-
-            //var vm = new PagedViewModel<IEnumerable<Employee>>
-            //{
-            //    PageIndex = model.PageIndex,
-            //    PageSize = model.PageSize,
-            //    TotalCount = totalCount,
-            //    TotalPageCount = totalPageCount,
-            //    //Data = employees,
-            //};
 
             return View(vm);
         }
