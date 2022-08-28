@@ -4,12 +4,23 @@
 // Write your JavaScript code.
 
 $(document).ready(function () {
+    $('#btnHideFilters').click(function (e) {
+        
+        $('#paginationForm').toggle(300);
+
+        $(this).text(function (i, text) {
+            return text === "Hide Filters" ? "Show Filters" : "Hide Filters";
+        })
+
+    });
+
     $('#searchFilter').multiselect({
         enableFiltering: true,
         enableCaseInsensitiveFiltering: true,
         maxHeight: 400,
         includeSelectAllOption: true,
-        //buttonWidth: '240px',
+        buttonWidth: '240px',
+        widthSynchronizationMode: 'always',
         numberDisplayed: 6,
         includeResetOption: true,
         //enableResetButton: true,
